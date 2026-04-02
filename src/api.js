@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// FIX: Use environment variable so prod points to Render URL, dev to localhost
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+// ✅ Always point to your live backend (Render)
+const BASE_URL = "https://ema-trading-backend.onrender.com";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -9,23 +9,22 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Request interceptor — log in development
+// Request interceptor (optional debug)
 api.interceptors.request.use(req => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[API] ${req.method?.toUpperCase()} ${req.url}`);
-  }
+  console.log(`[API] ${req.method?.toUpperCase()} ${req.baseURL}${req.url}`);
   return req;
 });
 
-// Response interceptor — handle errors globally
+// Response interceptor
 api.interceptors.response.use(
   res => res.data,
   err => {
-    const msg = err.response?.data?.error || err.message || "Unknown error";
-    console.error(`[API Error] ${err.config?.url}: ${msg}`);
-    throw new Error(msg);
+    console.error("[API ERROR]:", err.response || err.message);
+    throw err;
   }
 );
+
+// ===== APIs =====
 
 export const tradeAPI = {
   getAll:     (status)   => api.get("/api/trades", { params: status ? { status } : {} }),
@@ -36,23 +35,23 @@ export const tradeAPI = {
 };
 
 export const alertAPI = {
-  getAll:     (since)  => api.get("/api/alerts", { params: since ? { since } : {} }),
-  markAllRead:()       => api.put("/api/alerts/read-all"),
-  delete:     (id)     => api.delete(`/api/alerts/${id}`),
+  getAll:      (since) => api.get("/api/alerts", { params: since ? { since } : {} }),
+  markAllRead: ()      => api.put("/api/alerts/read-all"),
+  delete:      (id)    => api.delete(`/api/alerts/${id}`),
 };
 
 export const priceAPI = {
-  getAll:     ()       => api.get("/api/prices"),
-  getOne:     (symbol) => api.get(`/api/prices/${symbol}`),
+  getAll:  ()        => api.get("/api/prices"),
+  getOne:  (symbol)  => api.get(`/api/prices/${symbol}`),
 };
 
 export const strategyAPI = {
-  runScan:    ()       => api.get("/api/strategy/run"),
-  getPicks:   ()       => api.get("/api/strategy/picks"),
+  runScan:  () => api.get("/api/strategy/run"),
+  getPicks: () => api.get("/api/strategy/picks"),
 };
 
 export const configAPI = {
-  get:        ()       => api.get("/api/config"),
+  get: () => api.get("/api/config"),
 };
 
 export default api;
