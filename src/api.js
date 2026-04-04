@@ -5,7 +5,7 @@ const BASE_URL = "https://ema-trading-backend.onrender.com";
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
+  timeout: 60000,
   headers: { "Content-Type": "application/json" },
 });
 
